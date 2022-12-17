@@ -8,6 +8,15 @@ from PIL import Image, ImageDraw, ImageFont, ImageTk
 system_fonts = mpl.findSystemFonts(fontpaths=None, fontext='ttf')
 
 
+def hex_to_rgba(hexa, alpha):
+    rgb = []
+    for i in (1, 3, 5):
+        decimal = int(hexa[i:i + 2], 16)
+        rgb.append(decimal)
+    rgb.append(int(alpha / .39))
+    return tuple(rgb)
+
+
 class Watermark:
     def __init__(self, rt):
         self.bg = '#8c9ab5'
@@ -90,6 +99,9 @@ class Watermark:
         self.spaces_scale = Scale(self.panel2, from_=0, to=10, command=self.submit_text, variable=self.num_spaces,
                                   orient='horizontal', bg=self.bg)
 
+        self.x_pos_label = Label(self.panel2, text='x position', background=self.bg)
+        self.y_pos_label = Label(self.panel2, text='y position', background=self.bg)
+
         # copyright
         Label(self.panel, text='Copyright John Oden, 2022', background=self.bg).grid(column=1, row=12)
 
@@ -117,14 +129,6 @@ class Watermark:
             return self.photoImg.height()
         except:
             return 0
-
-    def hex_to_rgba(self, hexa, alpha):
-        rgb = []
-        for i in (1, 3, 5):
-            decimal = int(hexa[i:i + 2], 16)
-            rgb.append(decimal)
-        rgb.append(int(alpha / .39))
-        return tuple(rgb)
 
     def set_x(self, new_pos):
         self.x.set(new_pos)
@@ -184,7 +188,7 @@ class Watermark:
         self.photoImg.thumbnail((500, 500))
         text_mask = Image.new('RGBA', (self.photoImg.width + 400, self.photoImg.height + 400))
         mdr = ImageDraw.Draw(text_mask)
-        fill = self.hex_to_rgba(self.font_color, self.opacity.get())
+        fill = hex_to_rgba(self.font_color, self.opacity.get())
         W = self.photoImg.width * 2
         H = self.photoImg.height * 2
         word = self.font_text.get().strip()
@@ -234,13 +238,11 @@ class Watermark:
         except PIL.UnidentifiedImageError:
             pass
         self.photoImg.thumbnail((500, 500))
+        self.x_scale = Scale(self.panel2, from_=-500, to=self.photoImg.width, command=self.set_x, orient='horizontal',
+                             bg=self.bg)
+        self.y_scale = Scale(self.panel2, from_=-500, to=self.photoImg.height, command=self.set_y, orient='vertical',
+                             bg=self.bg)
 
-        x = self.photoImg.width
-        y = self.photoImg.height
-        self.x_pos_label = Label(self.panel2, text='x position', background=self.bg)
-        self.y_pos_label = Label(self.panel2, text='y position', background=self.bg)
-        self.x_scale = Scale(self.panel2, from_=-500, to=x, command=self.set_x, orient='horizontal', bg=self.bg)
-        self.y_scale = Scale(self.panel2, from_=-500, to=y, command=self.set_y, orient='vertical', bg=self.bg)
         self.watermark_label.grid(column=0, row=1)
         self.font_text.grid(column=0, row=2)
         self.opacity_label.grid(column=0, row=3)
