@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import filedialog as fd
 from tkinter import Tk, colorchooser, filedialog
 from PIL import Image, ImageDraw, ImageFont, ImageTk
+
 system_fonts = mpl.findSystemFonts(fontpaths=None, fontext='ttf')
 
 
@@ -23,18 +24,24 @@ class Watermark:
         self.y.set(1)
         self.font_text = StringVar()
         self.family = self.families[0]
+
         self.logoImg = Image.open('wm_logo.png')
         self.logoImg = self.logoImg.resize((150, 100))
+        self.logoImg = ImageTk.PhotoImage(self.logoImg)
+
+        self.bgImg = Image.open('bgimg.png')
+        self.bgImg = self.bgImg.resize((1200, 800))
+        self.bgImg = ImageTk.PhotoImage(self.bgImg)
+
         self.clicked = StringVar()
         self.clicked.set('Select Font')
         self.font_size = IntVar()
         self.font_size.set(16)
-        self.logoImg = ImageTk.PhotoImage(self.logoImg)
         self.bucket = None
         self.rotate = IntVar()
         self.rotate.set(0)
         self.xpositions = ['left', 'center', 'right']
-        self.ypositions = [ 'top', 'center', 'bottom']
+        self.ypositions = ['top', 'center', 'bottom']
         self.color = None
         self.text = None
         self.multi = False
@@ -42,9 +49,9 @@ class Watermark:
         self.num_spaces.set(0)
         rt.title('Watermark 2.0')
         rt.resizable(False, False)
-
+        print(self.logoImg)
         # main panel
-        self.panel = Frame(rt, width=800, height=800, padx=10, pady=10, background=self.bg)
+        self.panel = Label(rt, width=800, height=800, padx=10, pady=10, background=self.bg, image=self.bgImg)
         self.panel.grid(column=0, row=0, sticky=NSEW)
 
         # options panel
@@ -53,13 +60,13 @@ class Watermark:
 
         # logo
         self.logo = Label(self.panel2, image=self.logoImg, background=self.bg)
-        self.logo.grid(column=2, row=0,  sticky=NSEW)
+        self.logo.grid(column=2, row=0, sticky=NSEW)
 
-        #intial load button
+        # intial load button
         self.action = Button(self.panel2, text='Load Photo', command=self.load_photo)
         self.action.grid(column=0, row=0)
 
-        #settings group
+        # settings group
         self.font_text = Entry(self.panel2)
         self.watermark_label = Label(self.panel2, text='Watermark Text:', background=self.bg)
         self.opacity_label = Label(self.panel2, text='Opacity', background=self.bg)
@@ -72,14 +79,16 @@ class Watermark:
         self.family_label = Label(self.panel2, text='Font Family', background=self.bg)
         self.family_option = OptionMenu(self.panel2, self.clicked, *self.families, command=self.set_family)
         self.reset_button = Button(self.panel2, text='Reset', command=self.reset)
-        self.photo = Frame(self.panel)
+        # self.photo = Frame(self.panel)
         self.save_button = Button(self.panel2, text='Save Photo', command=lambda: self.save_pic())
         self.rotate_check = Checkbutton(self.panel2, text='Rotate', command=self.rotate_enable, background=self.bg)
-        self.rotate_scale = Scale(self.panel2, from_=0, to=359, command=self.submit_text,variable=self.rotate, orient='horizontal',
+        self.rotate_scale = Scale(self.panel2, from_=0, to=359, command=self.submit_text, variable=self.rotate,
+                                  orient='horizontal',
                                   bg=self.bg)
-        self.multiline_check = Checkbutton(self.panel2, text = 'multiline', command = self.multiline_enable, bg=self.bg)
-        self.spaces_label = Label(self.panel2, text = 'Number of Spaces', bg = self.bg)
-        self.spaces_scale = Scale(self.panel2, from_=0, to=10, command=self.submit_text,variable=self.num_spaces, orient='horizontal', bg=self.bg)
+        self.multiline_check = Checkbutton(self.panel2, text='multiline', command=self.multiline_enable, bg=self.bg)
+        self.spaces_label = Label(self.panel2, text='Number of Spaces', bg=self.bg)
+        self.spaces_scale = Scale(self.panel2, from_=0, to=10, command=self.submit_text, variable=self.num_spaces,
+                                  orient='horizontal', bg=self.bg)
 
         # copyright
         Label(self.panel, text='Copyright John Oden, 2022', background=self.bg).grid(column=1, row=12)
@@ -109,19 +118,18 @@ class Watermark:
         except:
             return 0
 
-
     def hex_to_rgba(self, hexa, alpha):
         rgb = []
         for i in (1, 3, 5):
-            decimal = int(hexa[i:i+2], 16)
+            decimal = int(hexa[i:i + 2], 16)
             rgb.append(decimal)
-        rgb.append(int(alpha/.39))
+        rgb.append(int(alpha / .39))
         return tuple(rgb)
 
     def set_x(self, new_pos):
         self.x.set(new_pos)
         self.submit_text()
-        
+
     def set_y(self, new_pos):
         self.y.set(new_pos)
         self.submit_text()
@@ -136,7 +144,7 @@ class Watermark:
         self.multi = False
         self.photoImg = None
         self.font_size.set(16)
-        self.photo.grid_forget()
+        # self.photo.grid_forget()
         self.clicked.set('Select Font')
         self.opacity.set(50)
         self.font_color = '#ffffff'
@@ -174,13 +182,13 @@ class Watermark:
         font2 = ImageFont.truetype(self.family, self.font_size.get())
         self.photoImg = PIL.Image.open(self.filename.get())
         self.photoImg.thumbnail((500, 500))
-        text_mask = Image.new('RGBA', (self.photoImg.width+400, self.photoImg.height+400))
+        text_mask = Image.new('RGBA', (self.photoImg.width + 400, self.photoImg.height + 400))
         mdr = ImageDraw.Draw(text_mask)
         fill = self.hex_to_rgba(self.font_color, self.opacity.get())
-        W = self.photoImg.width*2
-        H = self.photoImg.height*2
+        W = self.photoImg.width * 2
+        H = self.photoImg.height * 2
         word = self.font_text.get().strip()
-        filler = (' '*self.num_spaces.get())
+        filler = (' ' * self.num_spaces.get())
         word = word + filler
         ht, wt = font2.getsize(text=word)
         h = -100
@@ -190,15 +198,16 @@ class Watermark:
                 i = 0
                 fore = " "
                 while w <= W:
-                    mdr.text(text=(str(fore*i)+word), xy=(h, w), fill=fill, font=font2)
-                    i+=20
+                    mdr.text(text=(str(fore * i) + word), xy=(h, w), fill=fill, font=font2)
+                    i += 20
                     if i >= int(len(word)):
                         i = 0
-                    w += wt + (self.num_spaces.get()*1.5)
+                    w += wt + (self.num_spaces.get() * 1.5)
                 h += ht
         else:
             mdr.text((self.x.get(), self.y.get()), self.font_text.get(), font=font2, fill=fill)
         text_mask = text_mask.rotate(self.rotate.get())
+        print(self.rotate.get())
         self.photoImg.paste(text_mask, (self.x.get(), self.y.get()), text_mask)
         self.show_photo()
 
@@ -208,7 +217,9 @@ class Watermark:
 
     def choose_color(self):
         self.font_color = colorchooser.askcolor()[1]
+
         try:
+            print(self.font_color)
             self.color.config(background=self.font_color)
         except:
             self.color.config(background='')
@@ -231,30 +242,32 @@ class Watermark:
         self.x_scale = Scale(self.panel2, from_=-500, to=x, command=self.set_x, orient='horizontal', bg=self.bg)
         self.y_scale = Scale(self.panel2, from_=-500, to=y, command=self.set_y, orient='vertical', bg=self.bg)
         self.watermark_label.grid(column=0, row=1)
-        self.font_text.grid(      column=0, row=2)
-        self.opacity_label.grid(  column=0, row=3)
-        self.color.grid(          column=0, row=4)
-        self.opacity_scale.grid(  column=0, row=5)
-        self.size_label.grid(     column=0, row=6)
-        self.size_scale.grid(     column=0, row=7)
-        self.family_label.grid(   column=0, row=8)
-        self.family_option.grid(  column=0, row=9)
-        self.x_pos_label.grid(    column=0, row=11)
-        self.x_scale.grid(        column=0, row=12)
-        self.y_pos_label.grid(    column=0, row=13)
-        self.y_scale.grid(        column=0, row=14)
-        self.reset_button.grid(   column=0, row=15, pady=(10, 0))
-        self.save_button.grid(    column=7, row=0)
-        self.rotate_check.grid(   column=7, row=3)
+        self.font_text.grid(column=0, row=2)
+        self.opacity_label.grid(column=0, row=3)
+        self.color.grid(column=0, row=4)
+        self.opacity_scale.grid(column=0, row=5)
+        self.size_label.grid(column=0, row=6)
+        self.size_scale.grid(column=0, row=7)
+        self.family_label.grid(column=0, row=8)
+        self.family_option.grid(column=0, row=9)
+        self.x_pos_label.grid(column=0, row=11)
+        self.x_scale.grid(column=0, row=12)
+        self.y_pos_label.grid(column=0, row=13)
+        self.y_scale.grid(column=0, row=14)
+        self.reset_button.grid(column=0, row=15, pady=(10, 0))
+        self.save_button.grid(column=7, row=0)
+        self.rotate_check.grid(column=7, row=3)
         self.multiline_check.grid(column=7, row=5)
-        self.spaces_label.grid(   column=7, row=6)
-        self.spaces_scale.grid(   column=7, row=7)
+        self.spaces_label.grid(column=7, row=6)
+        self.spaces_scale.grid(column=7, row=7)
         self.show_photo()
 
     def show_photo(self):
         try:
             self.bucket.grid_forget()
+            print('fuck')
         except:
+            print('shit')
             pass
         photo = ImageTk.PhotoImage(self.photoImg, Image.ANTIALIAS)
         self.bucket = Label(self.panel2, background=self.bg, image=photo, relief='raised', width=self.photoImg.width,
