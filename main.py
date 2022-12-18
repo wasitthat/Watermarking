@@ -9,6 +9,8 @@ system_fonts = mpl.findSystemFonts(fontpaths=None, fontext='ttf')
 
 WIDTH = 1200
 HEIGHT = 800
+
+
 def hex_to_rgba(hexa, alpha):
     rgb = []
     for i in (1, 3, 5):
@@ -60,13 +62,10 @@ class Watermark:
         rt.title('Watermark 2.0')
         rt.resizable(False, False)
 
-        # main panel
-        self.panel = Label(rt, image=self.bgImg)
-        self.panel.grid(column=0, row=0)
 
         # options panel
-        self.panel2 = Frame(self.panel, background=self.bg, )
-        self.panel2.grid(column=0, row=1)
+        self.panel2 = Frame(rt, background=self.bg)
+        self.panel2.grid(column=0, row=0)
 
         # logo
         self.logo = Label(self.panel2, image=self.logoImg, background=self.bg)
