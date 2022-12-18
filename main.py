@@ -58,17 +58,18 @@ class Watermark:
         self.num_spaces.set(0)
         rt.title('Watermark 2.0')
         rt.resizable(False, False)
+
         # main panel
-        self.panel = Label(rt, width=800, height=800, padx=10, pady=10, background=self.bg, image=self.bgImg)
-        self.panel.grid(column=0, row=0, sticky=NSEW)
+        self.panel = Label(rt, image=self.bgImg)
+        self.panel.grid(column=0, row=0)
 
         # options panel
-        self.panel2 = Frame(self.panel, background=self.bg)
+        self.panel2 = Frame(self.panel, background=self.bg, )
         self.panel2.grid(column=0, row=1)
 
         # logo
         self.logo = Label(self.panel2, image=self.logoImg, background=self.bg)
-        self.logo.grid(column=2, row=0, sticky=NSEW)
+        self.logo.grid(column=2, row=0)
 
         # intial load button
         self.action = Button(self.panel2, text='Load Photo', command=self.load_photo)
@@ -82,10 +83,11 @@ class Watermark:
                                    orient='horizontal', bg=self.bg)
         self.color = Button(self.panel2, text='Font Color', command=self.choose_color, background=self.font_color)
         self.size_label = Label(self.panel2, text='Font Size', background=self.bg)
-        self.size_scale = Scale(self.panel2, variable=self.font_size, orient='horizontal', command=self.set_family,
+        self.size_scale = Scale(self.panel2, from_ = 1, to=250, variable=self.font_size, orient='horizontal', command=self.submit_text,
                                 bg=self.bg)
         self.family_label = Label(self.panel2, text='Font Family', background=self.bg)
         self.family_option = OptionMenu(self.panel2, self.clicked, *self.families, command=self.set_family)
+
         self.reset_button = Button(self.panel2, text='Reset', command=self.reset)
         # self.photo = Frame(self.panel)
         self.save_button = Button(self.panel2, text='Save Photo', command=lambda: self.save_pic())
@@ -102,7 +104,7 @@ class Watermark:
         self.y_pos_label = Label(self.panel2, text='y position', background=self.bg)
 
         # copyright
-        Label(self.panel, text='Copyright John Oden, 2022', background=self.bg).grid(column=1, row=12)
+        Label(self.panel2, text='Copyright John Oden, 2022', background=self.bg).grid(column=2, row=20)
 
         # binding to submit
         self.font_text.bind('<Return>', self.submit_text)
@@ -119,7 +121,7 @@ class Watermark:
         self.submit_text()
 
     def rotate_enable(self):
-        self.rotate_scale.grid(column=7, row=4)
+        self.rotate_scale.grid(column=7, row=2)
 
     def get_x(self):
         try:
@@ -154,34 +156,41 @@ class Watermark:
         self.clicked.set('Select Font')
         self.opacity.set(50)
         self.font_color = '#ffffff'
-        self.font_text.delete(0, END)
-        self.font_text.grid_forget()
-        self.watermark_label.grid_forget()
-        self.opacity_label.grid_forget()
-        self.opacity_scale.grid_forget()
         self.color.grid_forget()
-        self.size_label.grid_forget()
-        self.size_scale.grid_forget()
         self.family_label.grid_forget()
         self.family_option.grid_forget()
+        self.font_text.delete(0, END)
+        self.font_text.grid_forget()
+        self.multiline_check.grid_forget()
+        self.opacity_label.grid_forget()
+        self.opacity_scale.grid_forget()
+        self.reset_button.grid_forget()
+        self.rotate_check.grid_forget()
+        self.rotate_scale.grid_forget()
+        self.save_button.grid_forget()
+        self.size_label.grid_forget()
+        self.size_scale.grid_forget()
+        self.spaces_label.grid_forget()
+        self.spaces_scale.grid_forget()
+        self.watermark_label.grid_forget()
         self.x_pos_label.grid_forget()
         self.x_scale.grid_forget()
         self.y_pos_label.grid_forget()
         self.y_scale.grid_forget()
-        self.reset_button.grid_forget()
-        self.save_button.grid_forget()
-        self.rotate_check.grid_forget()
-        self.rotate_scale.grid_forget()
-        self.multiline_check.grid_forget()
-        self.spaces_scale.grid_forget()
-        self.spaces_label.grid_forget()
         try:
             self.bucket.destroy()
         except AttributeError:
             pass
 
+    def get_font_name(self):
+        return self.family.partition('Fonts\\')[2].partition('.')[0]
+
     def set_family(self, *args):
         self.family = self.clicked.get()
+        temp = StringVar()
+        temp.set(self.get_font_name())
+        self.clicked.set(temp.get())
+        self.color['font'] = self.get_font_name()
         self.submit_text()
 
     def submit_text(self, *args):
@@ -218,7 +227,7 @@ class Watermark:
 
     def scale_opacity(self, *args):
         self.opacity.set(args[0])
-        self.set_family()
+        self.submit_text()
 
     def choose_color(self):
         self.font_color = colorchooser.askcolor()[1]
@@ -248,16 +257,16 @@ class Watermark:
         self.size_scale.grid(column=0, row=7)
         self.family_label.grid(column=0, row=8)
         self.family_option.grid(column=0, row=9)
-        self.x_pos_label.grid(column=0, row=11)
-        self.x_scale.grid(column=0, row=12)
-        self.y_pos_label.grid(column=0, row=13)
-        self.y_scale.grid(column=0, row=14)
-        self.reset_button.grid(column=0, row=15, pady=(10, 0))
+        self.reset_button.grid(column=0, row=10)
         self.save_button.grid(column=7, row=0)
-        self.rotate_check.grid(column=7, row=3)
-        self.multiline_check.grid(column=7, row=5)
-        self.spaces_label.grid(column=7, row=6)
-        self.spaces_scale.grid(column=7, row=7)
+        self.rotate_check.grid(column=7, row=1)
+        self.multiline_check.grid(column=7, row=3)
+        self.spaces_label.grid(column=7, row=4)
+        self.spaces_scale.grid(column=7, row=5)
+        self.x_pos_label.grid(column=7, row=6)
+        self.x_scale.grid(column=7, row=7)
+        self.y_pos_label.grid(column=7, row=8)
+        self.y_scale.grid(column=7, row=9)
         self.show_photo()
 
     def show_photo(self):
