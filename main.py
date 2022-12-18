@@ -58,7 +58,6 @@ class Watermark:
         self.num_spaces.set(0)
         rt.title('Watermark 2.0')
         rt.resizable(False, False)
-        print(self.logoImg)
         # main panel
         self.panel = Label(rt, width=800, height=800, padx=10, pady=10, background=self.bg, image=self.bgImg)
         self.panel.grid(column=0, row=0, sticky=NSEW)
@@ -107,6 +106,10 @@ class Watermark:
 
         # binding to submit
         self.font_text.bind('<Return>', self.submit_text)
+        self.x_scale = Scale(self.panel2, from_=-500, to=500, command=self.set_x, orient='horizontal',
+                             bg=self.bg)
+        self.y_scale = Scale(self.panel2, from_=-500, to=500, command=self.set_y, orient='vertical',
+                             bg=self.bg)
 
     def multiline_enable(self):
         if self.multi:
@@ -148,7 +151,6 @@ class Watermark:
         self.multi = False
         self.photoImg = None
         self.font_size.set(16)
-        # self.photo.grid_forget()
         self.clicked.set('Select Font')
         self.opacity.set(50)
         self.font_color = '#ffffff'
@@ -211,7 +213,6 @@ class Watermark:
         else:
             mdr.text((self.x.get(), self.y.get()), self.font_text.get(), font=font2, fill=fill)
         text_mask = text_mask.rotate(self.rotate.get())
-        print(self.rotate.get())
         self.photoImg.paste(text_mask, (self.x.get(), self.y.get()), text_mask)
         self.show_photo()
 
@@ -223,7 +224,6 @@ class Watermark:
         self.font_color = colorchooser.askcolor()[1]
 
         try:
-            print(self.font_color)
             self.color.config(background=self.font_color)
         except:
             self.color.config(background='')
@@ -238,10 +238,6 @@ class Watermark:
         except PIL.UnidentifiedImageError:
             pass
         self.photoImg.thumbnail((500, 500))
-        self.x_scale = Scale(self.panel2, from_=-500, to=self.photoImg.width, command=self.set_x, orient='horizontal',
-                             bg=self.bg)
-        self.y_scale = Scale(self.panel2, from_=-500, to=self.photoImg.height, command=self.set_y, orient='vertical',
-                             bg=self.bg)
 
         self.watermark_label.grid(column=0, row=1)
         self.font_text.grid(column=0, row=2)
@@ -267,11 +263,9 @@ class Watermark:
     def show_photo(self):
         try:
             self.bucket.grid_forget()
-            print('fuck')
         except:
-            print('shit')
             pass
-        photo = ImageTk.PhotoImage(self.photoImg, Image.ANTIALIAS)
+        photo = ImageTk.PhotoImage(self.photoImg)
         self.bucket = Label(self.panel2, background=self.bg, image=photo, relief='raised', width=self.photoImg.width,
                             height=self.photoImg.height)
         self.bucket.image = photo
