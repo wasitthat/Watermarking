@@ -37,8 +37,8 @@ class Watermark:
         self.font_text = StringVar()
         self.family = self.families[0]
 
-        self.logoImg = Image.open('wm_logo.png')
-        self.logoImg = self.logoImg.resize((150, 100))
+        self.logoImg = Image.open('waterlogo.png')
+        self.logoImg = self.logoImg.resize((500, 125))
         self.logoImg = ImageTk.PhotoImage(self.logoImg)
 
         self.bgImg = Image.open('bgimg.png')
@@ -60,7 +60,7 @@ class Watermark:
         self.num_spaces = IntVar()
         self.num_spaces.set(0)
         rt.title('Watermark 2.0')
-        rt.resizable(False, False)
+        #rt.resizable(False, False)
 
 
         # options panel
