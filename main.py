@@ -7,7 +7,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageTk
 
 system_fonts = mpl.findSystemFonts(fontpaths=None, fontext='ttf')
 
-
+WIDTH = 1200
+HEIGHT = 800
 def hex_to_rgba(hexa, alpha):
     rgb = []
     for i in (1, 3, 5):
@@ -39,7 +40,7 @@ class Watermark:
         self.logoImg = ImageTk.PhotoImage(self.logoImg)
 
         self.bgImg = Image.open('bgimg.png')
-        self.bgImg = self.bgImg.resize((1200, 800))
+        self.bgImg = self.bgImg.resize((WIDTH, HEIGHT))
         self.bgImg = ImageTk.PhotoImage(self.bgImg)
 
         self.clicked = StringVar()
@@ -108,9 +109,9 @@ class Watermark:
 
         # binding to submit
         self.font_text.bind('<Return>', self.submit_text)
-        self.x_scale = Scale(self.panel2, from_=-500, to=500, command=self.set_x, orient='horizontal',
+        self.x_scale = Scale(self.panel2, from_=-WIDTH, to=WIDTH, command=self.set_x, orient='horizontal',
                              bg=self.bg)
-        self.y_scale = Scale(self.panel2, from_=-500, to=500, command=self.set_y, orient='vertical',
+        self.y_scale = Scale(self.panel2, from_=-HEIGHT, to=HEIGHT, command=self.set_y, orient='vertical',
                              bg=self.bg)
 
     def multiline_enable(self):
@@ -147,7 +148,7 @@ class Watermark:
         result = filedialog.asksaveasfilename(initialdir="/", title="Select file", filetypes=(
             ('JPEG', ('*.jpg', '*.jpeg', '*.jpe')), ('PNG', '*.png'), ('BMP', ('*.bmp', '*.jdib')), ('GIF', '*.gif')))
         if result:
-            self.photoImg.save(f'{result}.png', dpi=(300, 300))
+            self.photoImg.save(f'{result}.png', dpi=(WIDTH, HEIGHT))
 
     def reset(self):
         self.multi = False
@@ -196,7 +197,7 @@ class Watermark:
     def submit_text(self, *args):
         font2 = ImageFont.truetype(self.family, self.font_size.get())
         self.photoImg = PIL.Image.open(self.filename.get())
-        self.photoImg.thumbnail((500, 500))
+        self.photoImg.thumbnail((WIDTH, HEIGHT))
         text_mask = Image.new('RGBA', (self.photoImg.width + 400, self.photoImg.height + 400))
         mdr = ImageDraw.Draw(text_mask)
         fill = hex_to_rgba(self.font_color, self.opacity.get())
@@ -246,7 +247,7 @@ class Watermark:
             self.photoImg = Image.open(self.filename.get())
         except PIL.UnidentifiedImageError:
             pass
-        self.photoImg.thumbnail((500, 500))
+        self.photoImg.thumbnail((WIDTH, HEIGHT))
 
         self.watermark_label.grid(column=0, row=1)
         self.font_text.grid(column=0, row=2)
